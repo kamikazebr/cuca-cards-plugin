@@ -1,6 +1,6 @@
 ---
 name: cuca-flashcards
-description: Build language-learning flashcards with audio in the user's CucaCards collection, through a short conversation. Use when the user wants to create flashcards, study cards, Anki-style cards or vocabulary/sentence cards for any language in CucaCards, or wants to add pronunciation audio to cards. Interviews first, shows sample cards, creates ONE test card for approval, and only then creates the rest.
+description: Build and manage language-learning flashcards with audio in the user's CucaCards collection. Use when the user wants to create flashcards (words, sentences, example sentences with pronunciation, listening cards) for any language, add or change audio on cards (several voices, front and back, Anki [sound:] format), fix, suspend or delete cards, organise or archive decks, study/quiz in the chat, or set the daily reminder. For new cards it interviews first, shows sample cards, creates ONE test card for approval, and only then creates the rest.
 allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/skills/cuca-flashcards/scripts/audio.sh *)
 ---
 
@@ -87,7 +87,17 @@ Show 2–3 shapes, each as an actual card for *their* languages, as plain text:
 A · word        Front: 猫 (ねこ)            Back: gato
 B · sentence    Front: 猫が好きです。         Back: Eu gosto de gatos.
 C · listening   Front: 🔊 (audio only)       Back: 猫が好きです。 — Eu gosto de gatos.
+D · word + example, each with its own pronunciation
+                Front: 猫 🔊(word)          Back: gato
+                                                  猫が好きです。 — Eu gosto de gatos. 🔊(sentence)
 ```
+
+Shape **D** is often the best default for vocabulary: the word is heard
+alone on the front, and the back shows it *in use*, with the sentence spoken.
+Put the example sentence (and its translation) in `back`; the word's audio goes
+in `Frente`, the sentence's audio in `Verso`. Variations the user may want:
+both audios on the front (word, then sentence — two markers in `Frente`, the
+second with `mode: "append"`), or the same sentence in two voices.
 
 Adapt to the language:
 - **Japanese/Chinese:** ask about reading aids (furigana/pinyin) — on the front
@@ -126,9 +136,12 @@ adding it.
      `{"storageId":"..."}`;
    - `add_audio` with `cardId`, `field` (`Frente` for the front, `Verso` for
      the back), `uploadId` = that storageId, `text` = the text spoken,
-     `voice` = the voice id, and `mode: "append"` so the text stays in the field.
+     `voice` = the voice id, and `mode: "append"` — the text stays in the
+     field, and a second audio in the same field (example sentence, another
+     voice) is added instead of replacing the first.
    Speak only the target-language text — strip furigana in parentheses,
-   translations and HTML before synthesising.
+   translations and HTML before synthesising. For shape D, the back's audio
+   is the example sentence alone, not the translation.
 4. Ask the user to open CucaCards and look at it (the deck shows it under
    "Estudar" / the deck page) and play the audio. Ask: shape right? voice
    right? too long? Adjust and, if the shape changed, fix the test card with
@@ -147,6 +160,15 @@ Do not continue until they say it's good.
 - **Report briefly** after each group ("20/60 cards, audio done").
 - At the end: total created, skipped duplicates, anything that failed, and
   where to find the deck.
+
+## Beyond creating
+
+Audio nuances (several audios per field, replace vs append, nothing is lost,
+reuse of the same text+voice, editing without dropping audio), decks,
+archiving, editing, suspending, studying in the chat and the daily reminder:
+read [reference/capabilities.md](reference/capabilities.md) when the user asks
+for any of it, or asks what else CucaCards can do. Answer from there and offer
+to do it.
 
 ## Never
 
