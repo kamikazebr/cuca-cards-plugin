@@ -64,4 +64,4 @@ conta. Precisa do `uv` instalado para a voz.
 
 ## License
 
-MIT
+[GNU Affero General Public License v3.0 only](LICENSE) (`AGPL-3.0-only`).

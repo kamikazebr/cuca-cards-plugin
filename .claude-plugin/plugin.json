@@ -5,6 +5,6 @@
   "author": { "name": "Felipe Novaes Rocha" },
   "homepage": "https://cuca.felipenovaesrocha.xyz",
   "repository": "https://github.com/kamikazebr/cuca-cards-plugin",
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "keywords": ["flashcards", "anki", "language-learning", "spaced-repetition", "tts"]
 }
