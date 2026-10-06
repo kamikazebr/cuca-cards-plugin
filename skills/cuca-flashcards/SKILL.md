@@ -18,6 +18,19 @@ studying. Nothing here assumes a language pair.
 Fifty cards in the wrong shape are fifty cards to delete. One card in the wrong
 shape is a two-minute conversation.
 
+## Where you are running decides the audio
+
+Audio needs a shell: `audio.sh` synthesises the voice on the user's machine.
+- **Claude Code** (you can run Bash): everything below applies.
+- **claude.ai or the Claude app** (no shell): skip the `audio.sh server` check
+  and all audio steps. Say once, at the start, that this environment creates
+  cards **without audio**, and that audio works when the same plugin is used
+  in Claude Code. Never try to produce audio another way here (no base64 of
+  invented bytes, no other TTS).
+
+If you are not sure, try `audio.sh server` once; if Bash is unavailable, you
+are in the no-shell case.
+
 ## 0. Check the connection — and say where it points
 
 First, find out which CucaCards server this plugin is talking to:
@@ -33,8 +46,13 @@ server** (a test copy of the plugin) so nobody creates cards in the wrong
 place by accident. If the user expected another server, stop and say so.
 
 Then call `list_decks`. If the `cuca` tools are missing or answer "unauthorized",
-tell the user to run `/mcp`, pick **cuca** and sign in (it opens the browser;
-the password never reaches you). Stop until it works.
+tell the user to sign in: in Claude Code, run `/mcp`, pick **cuca** and log in;
+in the Claude app or claude.ai, connect the **cuca** connector in Settings →
+Connectors. Either way it opens the CucaCards site, and the password never
+reaches you. Stop until it works.
+
+If `prepare_audio_upload` does not exist among the tools, that CucaCards server
+predates direct audio upload: create the cards without audio and say so.
 
 `list_decks` also tells you what they already have — use it in the interview
 ("you already have a deck called *Japanese::N5*, add there or start a new one?").

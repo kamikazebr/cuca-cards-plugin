@@ -1,7 +1,7 @@
 {
   "name": "cuca-cards",
   "description": "Build language flashcards with audio in CucaCards, through a short conversation: it asks how you study, shows sample cards, makes one test card, and only then creates the rest.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": { "name": "Felipe Novaes Rocha" },
   "homepage": "https://cuca.felipenovaesrocha.xyz",
   "repository": "https://github.com/kamikazebr/cuca-cards-plugin",
