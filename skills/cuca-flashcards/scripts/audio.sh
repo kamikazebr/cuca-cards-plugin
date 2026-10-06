@@ -65,10 +65,10 @@ case "$cmd" in
     edge_tts --list-voices | awk -v p="$2" 'NR > 2 && index($1, p) == 1 { print $1, $2 }'
     ;;
   server)
-    # The SAME expression as .mcp.json at the plugin root -- if one changes,
-    # change the other. It lets the model tell the user which CucaCards it is
-    # about to write into (production, or a test server set via CUCA_MCP_URL).
-    echo "${CUCA_MCP_URL:-https://cuca.felipenovaesrocha.xyz/api/mcp}"
+    # Read from the plugin's own .mcp.json, so there is one source of truth:
+    # whatever URL the MCP connection uses is what this prints.
+    root="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/../../.." && pwd)}"
+    grep -oE '"url"[[:space:]]*:[[:space:]]*"[^"]+"' "$root/.mcp.json" | head -n 1 | sed -E 's/.*"([^"]+)"$/\1/'
     ;;
   *)
     sed -n '4,9p' "$0" >&2

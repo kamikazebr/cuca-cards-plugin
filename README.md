@@ -51,6 +51,12 @@ Add `https://cuca.felipenovaesrocha.xyz/api/mcp` as a custom connector. You can
 create cards there, but not audio: the voice script needs a shell, which only
 Claude Code has.
 
+## Testing against another server
+
+`dev/run-against.sh <mcp-url>` starts Claude Code with a temporary copy of the
+plugin pointed at a different CucaCards server. The skill announces which
+server it is connected to before creating anything.
+
 ---
 
 # Em português

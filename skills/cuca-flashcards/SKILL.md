@@ -29,9 +29,8 @@ ${CLAUDE_PLUGIN_ROOT}/skills/cuca-flashcards/scripts/audio.sh server
 Tell the user in one line, with the site address (the URL without `/api/mcp`),
 e.g. "Connected to CucaCards at https://cuca.felipenovaesrocha.xyz". If it is
 not the default production address, say clearly that it is a **different
-server** (a test one, set via `CUCA_MCP_URL`) so nobody creates cards in the
-wrong place by accident. If the user expected another server, stop: they need
-to restart Claude Code with the right `CUCA_MCP_URL`.
+server** (a test copy of the plugin) so nobody creates cards in the wrong
+place by accident. If the user expected another server, stop and say so.
 
 Then call `list_decks`. If the `cuca` tools are missing or answer "unauthorized",
 tell the user to run `/mcp`, pick **cuca** and sign in (it opens the browser;
