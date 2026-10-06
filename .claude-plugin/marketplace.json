@@ -8,7 +8,8 @@
     {
       "name": "cuca-cards",
       "source": "./",
-      "description": "Language flashcards with audio for CucaCards, built through a short interview."
+      "description": "Language flashcards with audio for CucaCards, built through a short interview.",
+      "version": "0.2.0"
     }
   ]
 }
