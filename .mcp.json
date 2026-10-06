@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "cuca": {
+      "type": "http",
+      "url": "${CUCA_MCP_URL:-https://cuca.felipenovaesrocha.xyz/api/mcp}"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "cuca-cards",
+  "description": "CucaCards plugins: build language flashcards with audio through a short conversation.",
+  "owner": {
+    "name": "Felipe Novaes Rocha"
+  },
+  "plugins": [
+    {
+      "name": "cuca-cards",
+      "source": "./",
+      "description": "Language flashcards with audio for CucaCards, built through a short interview."
+    }
+  ]
+}
