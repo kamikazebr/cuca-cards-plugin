@@ -64,7 +64,7 @@ case "$cmd" in
     edge_tts --list-voices | awk -v p="$2" 'NR > 2 && index($1, p) == 1 { print $1, $2 }'
     ;;
   *)
-    sed -n '2,6p' "$0" >&2
+    sed -n '4,8p' "$0" >&2
     exit 1
     ;;
 esac
