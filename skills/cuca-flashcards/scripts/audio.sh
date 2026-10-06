@@ -6,6 +6,7 @@
 #   audio.sh say    "<text>" <voice> <uploadUrl>   -> prints {"storageId":"..."}
 #   audio.sh sample "<text>" <voice> <file.mp3>    -> writes a local file to listen to
 #   audio.sh voices <lang-prefix>                  -> e.g. "ja", "es", "pt-BR"
+#   audio.sh server                                -> the CucaCards MCP URL in use
 #
 # The audio never passes through the conversation: the model gets an upload
 # URL from the MCP tool `prepare_audio_upload`, this script POSTs the bytes
@@ -63,8 +64,14 @@ case "$cmd" in
     [ $# -eq 2 ] || { echo 'usage: audio.sh voices <lang-prefix>' >&2; exit 1; }
     edge_tts --list-voices | awk -v p="$2" 'NR > 2 && index($1, p) == 1 { print $1, $2 }'
     ;;
+  server)
+    # The SAME expression as .mcp.json at the plugin root -- if one changes,
+    # change the other. It lets the model tell the user which CucaCards it is
+    # about to write into (production, or a test server set via CUCA_MCP_URL).
+    echo "${CUCA_MCP_URL:-https://cuca.felipenovaesrocha.xyz/api/mcp}"
+    ;;
   *)
-    sed -n '4,8p' "$0" >&2
+    sed -n '4,9p' "$0" >&2
     exit 1
     ;;
 esac

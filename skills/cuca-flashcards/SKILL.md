@@ -18,9 +18,22 @@ studying. Nothing here assumes a language pair.
 Fifty cards in the wrong shape are fifty cards to delete. One card in the wrong
 shape is a two-minute conversation.
 
-## 0. Check the connection
+## 0. Check the connection — and say where it points
 
-Call `list_decks`. If the `cuca` tools are missing or answer "unauthorized",
+First, find out which CucaCards server this plugin is talking to:
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/skills/cuca-flashcards/scripts/audio.sh server
+```
+
+Tell the user in one line, with the site address (the URL without `/api/mcp`),
+e.g. "Connected to CucaCards at https://cuca.felipenovaesrocha.xyz". If it is
+not the default production address, say clearly that it is a **different
+server** (a test one, set via `CUCA_MCP_URL`) so nobody creates cards in the
+wrong place by accident. If the user expected another server, stop: they need
+to restart Claude Code with the right `CUCA_MCP_URL`.
+
+Then call `list_decks`. If the `cuca` tools are missing or answer "unauthorized",
 tell the user to run `/mcp`, pick **cuca** and sign in (it opens the browser;
 the password never reaches you). Stop until it works.
 
