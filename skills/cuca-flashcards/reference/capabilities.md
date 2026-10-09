@@ -40,6 +40,17 @@ Audio is not a separate attachment. It is a **marker inside a field**:
 When the user asks "can a card have two audios?", "can the back have audio?",
 "what happens to the old audio?", answer from this list — and offer to do it.
 
+## Readings (furigana / pinyin)
+
+Anki's furigana syntax, rendered as ruby text above the word in `front`,
+`back` and `hint` of the cards `create_card` makes: `日本語[にほんご]`,
+`食[た]べる`, `你好[nǐ hǎo]`. The reading shows exactly where brackets are
+written; a space before an annotated word is a delimiter and disappears. It
+exports to Anki unchanged (`{{furigana:Field}}` is Anki's own filter). Search
+ignores the readings. For imported decks, readings show only if their own
+template uses `{{furigana:...}}` — check a card with `get_card` before
+adding brackets to their fields. Full rules: SKILL.md, section 2b.
+
 ## Decks
 
 | Tool | What it does | Watch out |

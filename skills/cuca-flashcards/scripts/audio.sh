@@ -7,6 +7,12 @@
 #   audio.sh sample "<text>" <voice> <file.mp3>    -> writes a local file to listen to
 #   audio.sh voices <lang-prefix>                  -> e.g. "ja", "es", "pt-BR"
 #   audio.sh server                                -> the CucaCards MCP URL in use
+#   audio.sh spoken "<text>"                       -> the text as it will be spoken
+#
+# Readings are never spoken: `say` and `sample` drop furigana/pinyin written
+# Anki-style (`日本語[にほんご]`) and the delimiter spaces between CJK words, so
+# the voice says 日本語を勉強します and not every word twice. Pass the output of
+# `spoken` as `text` to add_audio, so the audio cache keys on what was said.
 #
 # The audio never passes through the conversation: the model gets an upload
 # URL from the MCP tool `prepare_audio_upload`, this script POSTs the bytes
@@ -31,11 +37,24 @@ edge_tts() {
   fi
 }
 
+# Readings out, `[sound:...]` kept out of the way too, HTML tags gone; spaces
+# removed only BETWEEN CJK characters (they are Anki's furigana delimiters),
+# so "gato — 猫" keeps its spaces.
+falavel() {
+  printf '%s' "$1" | perl -CS -pe '
+    s/<[^>]+>//g;
+    s/\[sound:[^\]]*\]//g;
+    s/\[[^\]]*\]//g;
+    s/(?<=[\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}\x{3000}-\x{303F}\x{FF00}-\x{FFEF}])[ \t]+(?=[\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}])//g;
+    s/^\s+|\s+$//g;
+  '
+}
+
 synth() { # text voice out
   # Only the last line of a failure: a Python traceback is 30 lines of noise
   # for whoever reads this output, and the last one says what went wrong.
   local err
-  if ! err="$(edge_tts --voice "$2" --text "$1" --write-media "$3" 2>&1 >/dev/null)"; then
+  if ! err="$(edge_tts --voice "$2" --text "$(falavel "$1")" --write-media "$3" 2>&1 >/dev/null)"; then
     echo "error: $(printf '%s\n' "$err" | tail -n 1)" >&2
     exit 3
   fi
@@ -64,6 +83,10 @@ case "$cmd" in
     [ $# -eq 2 ] || { echo 'usage: audio.sh voices <lang-prefix>' >&2; exit 1; }
     edge_tts --list-voices | awk -v p="$2" 'NR > 2 && index($1, p) == 1 { print $1, $2 }'
     ;;
+  spoken)
+    [ $# -eq 2 ] || { echo 'usage: audio.sh spoken "<text>"' >&2; exit 1; }
+    falavel "$2"; echo
+    ;;
   server)
     # Read from the plugin's own .mcp.json, so there is one source of truth:
     # whatever URL the MCP connection uses is what this prints.
@@ -71,7 +94,7 @@ case "$cmd" in
     grep -oE '"url"[[:space:]]*:[[:space:]]*"[^"]+"' "$root/.mcp.json" | head -n 1 | sed -E 's/.*"([^"]+)"$/\1/'
     ;;
   *)
-    sed -n '4,9p' "$0" >&2
+    sed -n '4,10p' "$0" >&2
     exit 1
     ;;
 esac
