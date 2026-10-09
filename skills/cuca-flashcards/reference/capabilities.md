@@ -49,7 +49,11 @@ written; a space before an annotated word is a delimiter and disappears. It
 exports to Anki unchanged (`{{furigana:Field}}` is Anki's own filter). Search
 ignores the readings. For imported decks, readings show only if their own
 template uses `{{furigana:...}}` — check a card with `get_card` before
-adding brackets to their fields. Full rules: SKILL.md, section 2b.
+adding brackets to their fields. Brackets are the only place for a reading:
+never romaji or readings in parentheses. Rules: SKILL.md 2b; converting old
+cards that have romaji/parenthesized readings: SKILL.md 2c. In the review, a
+字 button shows or hides the readings, and a hidden reading appears when the
+word is tapped.
 
 ## Decks
 

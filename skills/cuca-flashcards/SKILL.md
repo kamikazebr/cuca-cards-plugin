@@ -116,6 +116,11 @@ Adapt to the language:
 CucaCards draws Anki-style readings as ruby text **above** the word, in
 `front`, `back` and `hint`. You write them; nobody types brackets by hand.
 
+**Brackets are the ONLY place a reading goes.** No romaji (`(nihongo)`), no
+kana in parentheses (`猫 (ねこ)`), no "Leitura: ぎんこう (ginkō)" in the hint.
+The learner sees the reading above the word; romaji next to it keeps them from
+ever learning kana. Write romaji only if the user explicitly asks for it.
+
 **Syntax** — the reading in square brackets right after the word:
 
 ```
@@ -151,6 +156,33 @@ ignores the brackets, so searching `日本語` finds `日本語[にほんご]`.
 
 If `create_card` does not mention furigana in its description, that CucaCards
 server does not render readings yet: write plain text and say so.
+
+## 2c. Fixing existing cards ("arruma meus cards")
+
+Cards made before readings existed — by another AI, by hand, imported — often
+carry romaji in parentheses, kana in parentheses, or the reading spelled out
+in the hint. When the user asks to fix them (or you notice it while working
+in a deck), convert them:
+
+1. **Find them.** `search_cards` in the deck (empty query lists recent ones);
+   look for `(` + latin letters, `(` + kana, or "Leitura"/"reading" in hints.
+   Only cards of the basic type (fields `Frente`/`Verso`/`Pista`) render
+   brackets; for imported note types, check with `get_card` whether their
+   template uses `{{furigana:...}}` before touching them — if not, say so.
+2. **Convert one, show it.** `get_card` for the raw fields, then write with
+   `update_card`:
+   - `よろしく　おねがいします (yoroshiku onegaishimasu) [sound:x.mp3]`
+     → `よろしく　おねがいします [sound:x.mp3]` (kana-only: no reading needed);
+   - `銀行` + hint `Leitura: ぎんこう (ginkō). おろす aqui = sacar` →
+     front `銀行[ぎんこう]`, hint `おろす aqui = sacar`;
+   - kanji inside sentences get brackets per word (2b rules).
+   **Every `[sound:...]` marker stays exactly where it was** — dropping one
+   silences the card. Ask the user to look at the converted card.
+3. **Then the rest**, in groups, reporting how many changed and listing any
+   card you were unsure about (ambiguous reading) instead of guessing.
+
+`update_card` keeps the review history and schedule intact — fixing text
+never resets what the user already learned.
 
 ## 3. Voices
 
