@@ -9,22 +9,24 @@ conversando com o Claude — em qualquer par de idiomas.
 
 Ele não sai despejando cards. Numa conversa normal, ele:
 
-1. **pergunta** o que você estuda, seu nível, seu objetivo e de onde vem o
+1. **olha os cards que você já tem** e, se achar algo para melhorar (romaji no
+   lugar de furigana, cards sem áudio, duplicados…), **propõe** — sem mexer em
+   nada até você dizer sim;
+2. **pergunta** o que você estuda, seu nível, seu objetivo e de onde vem o
    conteúdo (um tema, uma lista sua, um texto, uma música);
-2. **mostra** dois ou três formatos de card como exemplos reais no seu idioma;
-3. cria **um card de teste**, com áudio, para você abrir no CucaCards e aprovar;
-4. só então cria o resto, em grupos pequenos, sem repetir o que já existe.
+3. **mostra** dois ou três formatos de card como exemplos reais no seu idioma;
+4. cria **um card de teste**, com áudio, para você abrir no CucaCards e aprovar;
+5. só então cria o resto, em grupos pequenos, sem repetir o que já existe.
+
+Em japonês e chinês ele escreve a leitura (furigana / pinyin) **em cima da
+palavra**, como no Anki — nunca romaji entre parênteses.
 
 ## Instalar
 
 Você precisa de uma conta no [CucaCards](https://cuca.felipenovaesrocha.xyz)
 (criar é um toque, com Face ID ou digital).
 
-> **Áudio: chegando.** O envio de áudio está sendo implantado no servidor do
-> CucaCards. Até lá, os cards saem **sem áudio** em qualquer lugar — o plugin
-> avisa quando isso acontece. Todo o resto funciona.
-
-### No Claude Code (recomendado — é onde os cards vão ganhar áudio)
+### No Claude Code (recomendado — é onde os cards ganham áudio)
 
 1. Instale o **[uv](https://docs.astral.sh/uv/getting-started/installation/)**, que
    gera a voz. No Mac e no Linux:
@@ -52,8 +54,8 @@ Você precisa de uma conta no [CucaCards](https://cuca.felipenovaesrocha.xyz)
 4. Conecte o conector **cuca** e entre na sua conta (esse passo é manual).
 
 No app os cards são criados **sem áudio**: a voz é gerada no seu computador, e
-só o Claude Code consegue rodar isso. A entrevista e o card de teste funcionam
-igual.
+só o Claude Code consegue rodar isso. Furigana, entrevista e card de teste
+funcionam igual.
 
 ## Como usar
 
@@ -62,6 +64,7 @@ igual.
 - *"Quero flashcards de japonês, sou iniciante."*
 - *"Faz cards com as palavras desta música:"* (e cola a letra)
 - *"Cria 20 cards de espanhol sobre viagem, nível intermediário."*
+- *"Dá uma olhada nos meus cards e vê o que dá para melhorar."*
 
 Se ele não começar sozinho, chame direto:
 
@@ -77,8 +80,10 @@ https://cuca.felipenovaesrocha.xyz"*). Se não disser, use o comando acima.
 
 | Peça | O que acontece |
 |---|---|
+| *"Arruma meus cards de japonês"* | Troca romaji e leituras entre parênteses por furigana — um card primeiro, para você aprovar |
 | *"Põe áudio nesses cards"* | Gera a voz no idioma certo e anexa; mantém o áudio que já existir |
 | *"Quero duas vozes, uma masculina e uma feminina"* | Vários áudios no mesmo lado do card, como no Anki |
+| *"Esconde o furigana"* | No app, o botão **字** na revisão esconde e mostra a leitura; escondida, toque na palavra para espiar |
 | *"Vamos estudar aqui no chat"* | Mostra o card, espera sua resposta e registra a nota que **você** der |
 | *"Apaga o deck X"* | Arquiva por 30 dias — dá para trazer de volta |
 | *"Me lembra de revisar às 19h"* | Liga o lembrete diário (a permissão de notificação se dá no celular, em Ajustes) |
@@ -109,11 +114,12 @@ https://cuca.felipenovaesrocha.xyz"*). Se não disser, use o comando acima.
 
 A Claude plugin that builds language flashcards **with audio** in
 [CucaCards](https://cuca.felipenovaesrocha.xyz) through a short conversation:
-it interviews you, shows
+it looks at your existing cards and proposes fixes, interviews you, shows
 sample cards in your languages, makes **one test card** for you to approve,
-and only then creates the rest.
+and only then creates the rest. Japanese and Chinese readings (furigana /
+pinyin) go above the word, Anki-style.
 
-**Install (Claude Code — audio coming soon):** install [uv](https://docs.astral.sh/uv/),
+**Install (Claude Code — with audio):** install [uv](https://docs.astral.sh/uv/),
 then run `/plugin marketplace add kamikazebr/cuca-cards-plugin` and
 `/plugin install cuca-cards@cuca-cards`, then `/mcp` → **cuca** → sign in.
 
