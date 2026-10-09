@@ -1,6 +1,6 @@
 ---
 name: cuca-flashcards
-description: Build and manage language-learning flashcards with audio in the user's CucaCards collection. Use when the user wants to create flashcards (words, sentences, example sentences with pronunciation, listening cards) for any language, add or change audio on cards (several voices, front and back, Anki [sound:] format), fix, suspend or delete cards, organise or archive decks, study/quiz in the chat, or set the daily reminder. For new cards it interviews first, shows sample cards, creates ONE test card for approval, and only then creates the rest.
+description: Build and manage language-learning flashcards with audio in the user's CucaCards collection. Use when the user wants to create flashcards, study a language with their cards, or improve the cards they already have (it also checks existing cards on its own and proposes fixes), or wants to create flashcards (words, sentences, example sentences with pronunciation, listening cards) for any language, add or change audio on cards (several voices, front and back, Anki [sound:] format), fix, suspend or delete cards, organise or archive decks, study/quiz in the chat, or set the daily reminder. For new cards it interviews first, shows sample cards, creates ONE test card for approval, and only then creates the rest.
 allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/skills/cuca-flashcards/scripts/audio.sh *)
 ---
 
@@ -56,6 +56,37 @@ predates direct audio upload: create the cards without audio and say so.
 
 `list_decks` also tells you what they already have — use it in the interview
 ("you already have a deck called *Japanese::N5*, add there or start a new one?").
+
+## 0b. Look at what they already have — and propose, unasked
+
+The user should not have to know what could be better. Before the interview
+(or right after, once you know the language), look at the existing cards and
+propose improvements **on your own**:
+
+1. **Sample, cheaply.** For the decks of the language in question, `search_cards`
+   with an empty query (the most recent cards) — about 30 per deck. Use
+   `get_card` only on a few, to see raw fields. Read; change nothing.
+2. **Look for concrete problems:**
+   - romaji or readings in parentheses, or "Leitura:"/reading in the hint
+     (section 2c converts them);
+   - kanji with no reading in a beginner deck (section 2b);
+   - target-language cards with `hasAudio: false`;
+   - the same front twice;
+   - the back in the wrong language, or mixing languages;
+   - sentences far too long for the level, or many unrelated words in one card.
+3. **Propose in a few lines — at most the 3 that help most, with numbers and
+   one example each:**
+   > I looked at your decks. 1) 24 cards in *Japonês::Aulas* have romaji in
+   > parentheses (`(yoroshiku onegaishimasu)`) — I can replace it with
+   > furigana above the kanji. 2) 15 cards have no audio. Want me to fix 1,
+   > 2, both, or neither? I'll convert one first so you can see it.
+4. **Never change anything without a yes.** On a yes: one converted card for
+   approval, then the rest (2c). On a no: drop it for this conversation and
+   go on — do not bring it up again.
+5. Nothing worth proposing? Say nothing about it; don't report "all good".
+
+Do this once per conversation, and keep it short: it is a suggestion before
+the real work, not an audit.
 
 ## 1. Interview — short, with defaults, never a form
 
