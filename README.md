@@ -1,72 +1,129 @@
-# CucaCards plugin for Claude Code
+# Plugin do CucaCards para o Claude
 
-Build language flashcards **with audio** in [CucaCards](https://cuca.felipenovaesrocha.xyz)
-by talking to Claude. Any language pair.
+Monte flashcards de idiomas **com áudio** no [CucaCards](https://cuca.felipenovaesrocha.xyz)
+conversando com o Claude — em qualquer par de idiomas.
 
-It does not start dumping cards. It:
+> English version below: [In English](#in-english).
 
-1. **asks** what you study, your level, your goal and where the content comes from;
-2. **shows** two or three card shapes as real examples in your languages
-   (word, sentence, listening…);
-3. creates **one test card**, with audio, for you to open in CucaCards and approve;
-4. only then creates the rest, in small batches, skipping duplicates.
+## O que ele faz
 
-## Install
+Ele não sai despejando cards. Numa conversa normal, ele:
 
-In Claude Code:
+1. **pergunta** o que você estuda, seu nível, seu objetivo e de onde vem o
+   conteúdo (um tema, uma lista sua, um texto, uma música);
+2. **mostra** dois ou três formatos de card como exemplos reais no seu idioma;
+3. cria **um card de teste**, com áudio, para você abrir no CucaCards e aprovar;
+4. só então cria o resto, em grupos pequenos, sem repetir o que já existe.
+
+## Instalar
+
+Você precisa de uma conta no [CucaCards](https://cuca.felipenovaesrocha.xyz)
+(criar é um toque, com Face ID ou digital).
+
+> **Áudio: chegando.** O envio de áudio está sendo implantado no servidor do
+> CucaCards. Até lá, os cards saem **sem áudio** em qualquer lugar — o plugin
+> avisa quando isso acontece. Todo o resto funciona.
+
+### No Claude Code (recomendado — é onde os cards vão ganhar áudio)
+
+1. Instale o **[uv](https://docs.astral.sh/uv/getting-started/installation/)**, que
+   gera a voz. No Mac e no Linux:
+
+   ```
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```
+
+2. Dentro do Claude Code, rode:
+
+   ```
+   /plugin marketplace add kamikazebr/cuca-cards-plugin
+   /plugin install cuca-cards@cuca-cards
+   ```
+
+3. Rode **`/mcp`**, escolha **cuca** e entre na sua conta do CucaCards — abre o
+   navegador, você confirma com a passkey e volta. O Claude nunca vê sua senha;
+   dá para revogar o acesso quando quiser.
+
+### No app do Claude ou em claude.ai (sem áudio)
+
+1. **Configurações → Plugins → Adicionar → Adicionar marketplace.**
+2. Cole **`kamikazebr/cuca-cards-plugin`** e confirme.
+3. Abra o plugin **Cuca cards** e toque em **Adicionar**.
+4. Conecte o conector **cuca** e entre na sua conta (esse passo é manual).
+
+No app os cards são criados **sem áudio**: a voz é gerada no seu computador, e
+só o Claude Code consegue rodar isso. A entrevista e o card de teste funcionam
+igual.
+
+## Como usar
+
+**Peça em linguagem normal**, em qualquer idioma:
+
+- *"Quero flashcards de japonês, sou iniciante."*
+- *"Faz cards com as palavras desta música:"* (e cola a letra)
+- *"Cria 20 cards de espanhol sobre viagem, nível intermediário."*
+
+Se ele não começar sozinho, chame direto:
 
 ```
-/plugin marketplace add kamikazebr/cuca-cards-plugin
-/plugin install cuca-cards@cuca-cards
+/cuca-cards:cuca-flashcards
 ```
 
-Then run `/mcp`, choose **cuca** and sign in to your CucaCards account in the
-browser. Claude never sees your password; you can revoke access at any time.
+**Como saber que o plugin entrou:** a primeira coisa que ele diz é em qual
+CucaCards está gravando (por exemplo, *"Conectado ao CucaCards em
+https://cuca.felipenovaesrocha.xyz"*). Se não disser, use o comando acima.
 
-Now just ask: *"I want flashcards for Japanese, I'm a beginner"* — in any language.
+### O que mais dá para pedir
 
-## Audio
+| Peça | O que acontece |
+|---|---|
+| *"Põe áudio nesses cards"* | Gera a voz no idioma certo e anexa; mantém o áudio que já existir |
+| *"Quero duas vozes, uma masculina e uma feminina"* | Vários áudios no mesmo lado do card, como no Anki |
+| *"Vamos estudar aqui no chat"* | Mostra o card, espera sua resposta e registra a nota que **você** der |
+| *"Apaga o deck X"* | Arquiva por 30 dias — dá para trazer de volta |
+| *"Me lembra de revisar às 19h"* | Liga o lembrete diário (a permissão de notificação se dá no celular, em Ajustes) |
 
-Generated on your machine with the neural voices from Microsoft Edge's
-read-aloud ([edge-tts](https://github.com/rany2/edge-tts)): free, no account,
-~90 voices. It needs **[uv](https://docs.astral.sh/uv/)** (or `pipx`) installed;
-the script runs `uvx edge-tts` on demand.
+### Problemas comuns
 
-The audio file goes straight from your machine to CucaCards — it does not pass
-through the conversation.
+- **Ele pede login de novo / "unauthorized":** rode `/mcp`, escolha **cuca** e
+  entre de novo.
+- **Os cards saíram sem áudio:** no app do Claude não há áudio (veja acima). No
+  Claude Code, confira se o `uv` está instalado (`uv --version`).
+- **O plugin não aparece no app depois de atualizar:** em **Gerenciar
+  marketplaces**, use **Verificar atualizações** no `cuca-cards-plugin`.
 
-> edge-tts uses an unofficial endpoint. If it stops working, replace the
-> `synth` function in `skills/cuca-flashcards/scripts/audio.sh` with any TTS
-> that writes an mp3.
+## Detalhes técnicos
 
-## Requirements
-
-- Claude Code
-- A CucaCards account
-- `uv` (or `pipx`) and `curl`
-
-## Using claude.ai or the Claude app instead
-
-Add `https://cuca.felipenovaesrocha.xyz/api/mcp` as a custom connector. You can
-create cards there, but not audio: the voice script needs a shell, which only
-Claude Code has.
-
-## Testing against another server
-
-`dev/run-against.sh <mcp-url>` starts Claude Code with a temporary copy of the
-plugin pointed at a different CucaCards server. The skill announces which
-server it is connected to before creating anything.
+- A voz vem das vozes neurais do Microsoft Edge ([edge-tts](https://github.com/rany2/edge-tts)):
+  grátis, sem conta, ~90 vozes. É um serviço não oficial; se parar, troque a
+  função `synth` em `skills/cuca-flashcards/scripts/audio.sh` por qualquer TTS
+  que gere mp3.
+- O arquivo de áudio vai direto do seu computador para o CucaCards — não passa
+  pela conversa.
+- `dev/run-against.sh <url-do-mcp>` abre o Claude Code com uma cópia do plugin
+  apontada para outro servidor do CucaCards (para testes).
 
 ---
 
-# Em português
+## In English
 
-Plugin do Claude Code que monta flashcards de idiomas **com áudio** no CucaCards
-conversando com você: entrevista curta, exemplos de card no seu par de idiomas,
-**um card de teste** para você aprovar, e só depois o resto.
+A Claude plugin that builds language flashcards **with audio** in
+[CucaCards](https://cuca.felipenovaesrocha.xyz) through a short conversation:
+it interviews you, shows
+sample cards in your languages, makes **one test card** for you to approve,
+and only then creates the rest.
 
-Instalar: os dois comandos `/plugin` acima, depois `/mcp` → **cuca** → entrar na
-conta. Precisa do `uv` instalado para a voz.
+**Install (Claude Code — audio coming soon):** install [uv](https://docs.astral.sh/uv/),
+then run `/plugin marketplace add kamikazebr/cuca-cards-plugin` and
+`/plugin install cuca-cards@cuca-cards`, then `/mcp` → **cuca** → sign in.
+
+**Install (Claude app / claude.ai — no audio):** Settings → Plugins → Add →
+Add marketplace → `kamikazebr/cuca-cards-plugin`; add **Cuca cards**; connect
+the **cuca** connector and sign in.
+
+**Use:** just ask (*"I want Japanese flashcards, I'm a beginner"*), or run
+`/cuca-cards:cuca-flashcards`. It first tells you which CucaCards it is
+writing to — if it doesn't, the plugin isn't active.
 
 ## License
 
