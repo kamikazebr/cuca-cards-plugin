@@ -5,7 +5,10 @@
 # keeps the production URL written literally in .mcp.json, because claude.ai
 # and the Claude app do not expand environment variables there.
 #
-#   dev/run-against.sh https://your-test-server.example/api/mcp
+#   dev/run-against.sh https://your-test-server.example/api/mcp [claude args...]
+#
+# CLAUDE_BIN picks the claude binary (default: claude), e.g. a wrapper that
+# routes through a proxy:  CLAUDE_BIN=claude9 dev/run-against.sh <url> --continue
 set -euo pipefail
 [ $# -ge 1 ] || { echo "usage: dev/run-against.sh <mcp-url> [claude args...]" >&2; exit 1; }
 url="$1"; shift
@@ -14,4 +17,4 @@ tmp="$(mktemp -d "${TMPDIR:-/tmp}/cuca-plugin.XXXXXX")"
 cp -R "$src/.claude-plugin" "$src/skills" "$tmp/"
 printf '{\n  "mcpServers": {\n    "cuca": { "type": "http", "url": "%s" }\n  }\n}\n' "$url" > "$tmp/.mcp.json"
 echo "plugin copy -> $url" >&2
-exec claude --plugin-dir "$tmp" "$@"
+exec "${CLAUDE_BIN:-claude}" --plugin-dir "$tmp" "$@"

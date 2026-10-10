@@ -1,6 +1,6 @@
 ---
 name: cuca-flashcards
-description: Build and manage language-learning flashcards with audio in the user's CucaCards collection. Use when the user wants to create flashcards (words, sentences, example sentences with pronunciation, listening cards) for any language, add or change audio on cards (several voices, front and back, Anki [sound:] format), fix, suspend or delete cards, organise or archive decks, study/quiz in the chat, or set the daily reminder. For new cards it interviews first, shows sample cards, creates ONE test card for approval, and only then creates the rest.
+description: Build and manage language-learning flashcards with audio in the user's CucaCards collection. Use when the user wants to create flashcards, study a language with their cards, or improve the cards they already have (it also checks existing cards on its own and proposes fixes), or wants to create flashcards (words, sentences, example sentences with pronunciation, listening cards) for any language, add or change audio on cards (several voices, front and back, Anki [sound:] format), fix, suspend or delete cards, organise or archive decks, study/quiz in the chat, or set the daily reminder. For new cards it interviews first, shows sample cards, creates ONE test card for approval, and only then creates the rest.
 allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/skills/cuca-flashcards/scripts/audio.sh *)
 ---
 
@@ -57,6 +57,37 @@ predates direct audio upload: create the cards without audio and say so.
 `list_decks` also tells you what they already have — use it in the interview
 ("you already have a deck called *Japanese::N5*, add there or start a new one?").
 
+## 0b. Look at what they already have — and propose, unasked
+
+The user should not have to know what could be better. Before the interview
+(or right after, once you know the language), look at the existing cards and
+propose improvements **on your own**:
+
+1. **Sample, cheaply.** For the decks of the language in question, `search_cards`
+   with an empty query (the most recent cards) — about 30 per deck. Use
+   `get_card` only on a few, to see raw fields. Read; change nothing.
+2. **Look for concrete problems:**
+   - romaji or readings in parentheses, or "Leitura:"/reading in the hint
+     (section 2c converts them);
+   - kanji with no reading in a beginner deck (section 2b);
+   - target-language cards with `hasAudio: false`;
+   - the same front twice;
+   - the back in the wrong language, or mixing languages;
+   - sentences far too long for the level, or many unrelated words in one card.
+3. **Propose in a few lines — at most the 3 that help most, with numbers and
+   one example each:**
+   > I looked at your decks. 1) 24 cards in *Japonês::Aulas* have romaji in
+   > parentheses (`(yoroshiku onegaishimasu)`) — I can replace it with
+   > furigana above the kanji. 2) 15 cards have no audio. Want me to fix 1,
+   > 2, both, or neither? I'll convert one first so you can see it.
+4. **Never change anything without a yes.** On a yes: one converted card for
+   approval, then the rest (2c). On a no: drop it for this conversation and
+   go on — do not bring it up again.
+5. Nothing worth proposing? Say nothing about it; don't report "all good".
+
+Do this once per conversation, and keep it short: it is a suggestion before
+the real work, not an audit.
+
 ## 1. Interview — short, with defaults, never a form
 
 Ask one or two things at a time, each with a suggested answer the user can
@@ -73,7 +104,11 @@ just accept. Skip what they already told you. You need:
    Offer the back too (useful when the back is a sentence in the target
    language, or for listening practice). Offer two voices for the language —
    regional variant and gender — and let them pick (section 3).
-6. **How many, and which deck.** Suggest a modest first batch (10–20).
+6. **Readings — Japanese and Chinese only** (section 2b). Where the furigana
+   or pinyin goes: on the front (helps reading — the beginner default), only
+   in the answer (the reading becomes part of what is recalled — the default
+   from intermediate up), or nowhere. Show it on a real card, don't describe it.
+7. **How many, and which deck.** Suggest a modest first batch (10–20).
 
 Keep it light: if they say "just do something good for a beginner", choose
 sensible defaults, say what you chose in one line, and go straight to the test
@@ -84,7 +119,7 @@ card.
 Show 2–3 shapes, each as an actual card for *their* languages, as plain text:
 
 ```
-A · word        Front: 猫 (ねこ)            Back: gato
+A · word        Front: 猫 (with ねこ on top)   Back: gato
 B · sentence    Front: 猫が好きです。         Back: Eu gosto de gatos.
 C · listening   Front: 🔊 (audio only)       Back: 猫が好きです。 — Eu gosto de gatos.
 D · word + example, each with its own pronunciation
@@ -100,13 +135,85 @@ both audios on the front (word, then sentence — two markers in `Frente`, the
 second with `mode: "append"`), or the same sentence in two voices.
 
 Adapt to the language:
-- **Japanese/Chinese:** ask about reading aids (furigana/pinyin) — on the front
-  they give the answer away; in the hint they don't.
+- **Japanese/Chinese:** readings are written automatically — see 2b.
 - **Gendered languages (es, fr, pt, de…):** include the article (*la mesa*,
   *der Tisch*).
 - **Verbs:** infinitive alone, or inside a sentence? Sentences teach use;
   infinitives teach recognition.
 - **False friends and traps** go in `hint` — it shows with the answer.
+
+## 2b. Readings: furigana (Japanese) and pinyin (Chinese)
+
+CucaCards draws Anki-style readings as ruby text **above** the word, in
+`front`, `back` and `hint`. You write them; nobody types brackets by hand.
+
+**Brackets are the ONLY place a reading goes.** No romaji (`(nihongo)`), no
+kana in parentheses (`猫 (ねこ)`), no "Leitura: ぎんこう (ginkō)" in the hint.
+The learner sees the reading above the word; romaji next to it keeps them from
+ever learning kana. Write romaji only if the user explicitly asks for it.
+
+**Syntax** — the reading in square brackets right after the word:
+
+```
+日本語[にほんご]を 勉強[べんきょう]します     食[た]べる      你好[nǐ hǎo]
+```
+
+- The reading covers the text back to the previous **space**. So put a space
+  before every annotated word that does not start the field — the space is a
+  delimiter and disappears on screen: `日本語[にほんご]を 勉強[べんきょう]します`.
+  Without it, the reading of 勉強 would cover を勉強.
+- Annotate **only the kanji**, never the okurigana: `食[た]べる`, `新[あたら]しい`.
+- Kana-only words need no reading: `ねこ`, `パン`.
+- Chinese: pinyin with tone marks, per word or per character —
+  `你好[nǐ hǎo]` or `你[nǐ]好[hǎo]`; keep it consistent within a deck.
+- Readings must be **right**: a wrong reading teaches a wrong word. When
+  unsure of a kanji's reading in context (e.g. 一日: いちにち vs ついたち),
+  pick the one that matches the sentence, or ask.
+- After a non-CJK character the space is still needed and still disappears
+  (`gato — 猫[ねこ]` shows as "gato —猫"). If the visible space matters, put
+  the annotated word on its own line or in its own field.
+
+**Where it goes is the choice from the interview** — the reading shows exactly
+where brackets are written:
+
+| choice | `front` | `back` |
+|---|---|---|
+| on the front (beginner) | `猫[ねこ]が 好[す]きです` | `Eu gosto de gatos.` |
+| only in the answer | `猫が好きです` | `猫[ねこ]が 好[す]きです — Eu gosto de gatos.` |
+| nowhere | `猫が好きです` | `Eu gosto de gatos.` |
+
+The example sentence in `back` follows the same rule as the front. Search
+ignores the brackets, so searching `日本語` finds `日本語[にほんご]`.
+
+If `create_card` does not mention furigana in its description, that CucaCards
+server does not render readings yet: write plain text and say so.
+
+## 2c. Fixing existing cards ("arruma meus cards")
+
+Cards made before readings existed — by another AI, by hand, imported — often
+carry romaji in parentheses, kana in parentheses, or the reading spelled out
+in the hint. When the user asks to fix them (or you notice it while working
+in a deck), convert them:
+
+1. **Find them.** `search_cards` in the deck (empty query lists recent ones);
+   look for `(` + latin letters, `(` + kana, or "Leitura"/"reading" in hints.
+   Only cards of the basic type (fields `Frente`/`Verso`/`Pista`) render
+   brackets; for imported note types, check with `get_card` whether their
+   template uses `{{furigana:...}}` before touching them — if not, say so.
+2. **Convert one, show it.** `get_card` for the raw fields, then write with
+   `update_card`:
+   - `よろしく　おねがいします (yoroshiku onegaishimasu) [sound:x.mp3]`
+     → `よろしく　おねがいします [sound:x.mp3]` (kana-only: no reading needed);
+   - `銀行` + hint `Leitura: ぎんこう (ginkō). おろす aqui = sacar` →
+     front `銀行[ぎんこう]`, hint `おろす aqui = sacar`;
+   - kanji inside sentences get brackets per word (2b rules).
+   **Every `[sound:...]` marker stays exactly where it was** — dropping one
+   silences the card. Ask the user to look at the converted card.
+3. **Then the rest**, in groups, reporting how many changed and listing any
+   card you were unsure about (ambiguous reading) instead of guessing.
+
+`update_card` keeps the review history and schedule intact — fixing text
+never resets what the user already learned.
 
 ## 3. Voices
 
@@ -132,16 +239,17 @@ adding it.
    (word class) and `tags`. It returns the `cardIds`.
 3. For each side that gets audio:
    - `prepare_audio_upload` → returns `uploadUrl` (one per file);
-   - `audio.sh say "<exact text spoken>" <voice> "<uploadUrl>"` → prints
-     `{"storageId":"..."}`;
+   - `audio.sh say "<target-language text>" <voice> "<uploadUrl>"` → prints
+     `{"storageId":"..."}`. You can pass the text WITH readings: the script
+     never speaks the brackets (日本語[にほんご] is said once, as 日本語);
    - `add_audio` with `cardId`, `field` (`Frente` for the front, `Verso` for
-     the back), `uploadId` = that storageId, `text` = the text spoken,
+     the back), `uploadId` = that storageId, `text` = the output of
+     `audio.sh spoken "<same text>"` (what was actually said),
      `voice` = the voice id, and `mode: "append"` — the text stays in the
      field, and a second audio in the same field (example sentence, another
      voice) is added instead of replacing the first.
-   Speak only the target-language text — strip furigana in parentheses,
-   translations and HTML before synthesising. For shape D, the back's audio
-   is the example sentence alone, not the translation.
+   Speak only the target-language text — leave out translations. For shape D,
+   the back's audio is the example sentence alone, not the translation.
 4. Ask the user to open CucaCards and look at it (the deck shows it under
    "Estudar" / the deck page) and play the audio. Ask: shape right? voice
    right? too long? Adjust and, if the shape changed, fix the test card with
